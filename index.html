@@ -319,7 +319,7 @@ function downloadPdf(){
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(17);
   doc.setTextColor(31,59,44);
-  doc.text('Balade au jardin', marginX, y);
+  doc.text("Activité à l'atelier", marginX, y);
   y += 7;
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
@@ -333,7 +333,8 @@ function downloadPdf(){
   doc.setFont('helvetica', 'italic');
   doc.setFontSize(11);
   doc.setTextColor(89,117,74);
-  doc.text("« Pour cette activité à l'atelier, prenez en photo chacun des composants clés d'un véhicule électrique. Vous pouvez noter leur nom sous chaque photo. »", marginX, y);
+  doc.text("« Pour cette activité à l'atelier, prenez en photo chacun des composants clés d'un véhicule électrique. »", marginX, y);
+   doc.text("Vous pouvez noter leur nom sous chaque photo. »", marginX, y);
   y += 10;
  
   entries.forEach((e) => {
@@ -362,7 +363,7 @@ function downloadPdf(){
     y += 6;
   });
  
-  doc.save('balade-jardin.pdf');
+  doc.save('activite-composants.pdf');
 }
 </script>
  
