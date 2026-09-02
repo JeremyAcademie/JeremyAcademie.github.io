@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Balade au jardin</title>
+<title>Activité à l'atelier</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,600;1,400&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -194,18 +194,18 @@
   <div class="header">
     <div class="avatar">🌿</div>
     <div class="header-txt">
-      <h1>Balade au jardin</h1>
-      <span>Activité en cours</span>
+      <h1>Académie Revolte</h1>
+      <span>Activité à l'atelier</span>
     </div>
   </div>
  
   <div class="dl-banner" id="dl-banner">
-    <button onclick="downloadPdf()">Télécharger le résultat</button>
+    <button onclick="downloadPdf()">Enregistrer la discussion (pdf)</button>
   </div>
  
   <div class="chat" id="chat">
     <div class="bubble in">
-      Allons dans le jardin prendre en photo des pissenlits 🌼
+      Pour cette activité à l'atelier, prenez en photo chacun des composants clés d'un véhicule électrique. Vous pouvez noter leur nom sous chaque photo.
       <span class="time" id="start-time"></span>
     </div>
   </div>
@@ -333,7 +333,7 @@ function downloadPdf(){
   doc.setFont('helvetica', 'italic');
   doc.setFontSize(11);
   doc.setTextColor(89,117,74);
-  doc.text('« Allons dans le jardin prendre en photo des pissenlits »', marginX, y);
+  doc.text("« Pour cette activité à l'atelier, prenez en photo chacun des composants clés d'un véhicule électrique. Vous pouvez noter leur nom sous chaque photo. »", marginX, y);
   y += 10;
  
   entries.forEach((e) => {
