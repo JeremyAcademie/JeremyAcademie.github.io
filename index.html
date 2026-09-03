@@ -373,9 +373,9 @@ async function downloadPdf(){
   doc.setTextColor(0,0,0);
   doc.text("« Pour cette activité à l'atelier, prenez en photos les principaux composants d'un véhicule électrique. ", marginX, y);
   y += 5;
-  doc.text('Notez leur nom, leur rôle, les points de contrôle durant la révision, bref :', marginX, y);
+  doc.text("Notez leur nom, leur rôle, les points de contrôle durant la révision, bref : tout ce qui semble utile", marginX, y);
   y += 5;
-  doc.text('tout ce qui semble utile à conserver !  »', marginX, y);
+  doc.text("à conserver !  »", marginX, y);
   y += 10;
 
   entries.forEach((e, i) => {
