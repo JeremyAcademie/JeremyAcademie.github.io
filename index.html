@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Activité à l'atelier</title>
+<title>Balade au jardin</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,600;1,400&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -32,12 +32,14 @@
     width:100%;
     max-width:440px;
     height:100vh;
+    height:100dvh; /* s'ajuste dynamiquement quand la barre d'adresse/recherche du navigateur mobile apparaît ou disparaît */
     background:var(--paper);
     display:flex;
     flex-direction:column;
     position:relative;
+    overflow:hidden;
   }
- 
+
   /* Header */
   .header{
     background:var(--forest);
@@ -67,7 +69,7 @@
     font-size:0.78rem;
     color:#C9D6C4;
   }
- 
+
   /* Download banner */
   .dl-banner{
     display:none;
@@ -90,7 +92,7 @@
     cursor:pointer;
   }
   .dl-banner button:active{ transform:scale(0.97); }
- 
+
   /* Chat area */
   .chat{
     flex:1;
@@ -99,6 +101,21 @@
     display:flex;
     flex-direction:column;
     gap:10px;
+  }
+  .msg-row{
+    display:flex;
+    align-items:flex-end;
+    gap:8px;
+    max-width:100%;
+  }
+  .msg-row.out{ justify-content:flex-end; }
+  .sender-photo{
+    width:30px;
+    height:30px;
+    border-radius:50%;
+    object-fit:cover;
+    flex-shrink:0;
+    box-shadow:0 1px 2px rgba(0,0,0,0.15);
   }
   .bubble{
     max-width:78%;
@@ -112,7 +129,6 @@
   .bubble.in{
     background:var(--bubble-in);
     color:var(--ink);
-    align-self:flex-start;
     border-bottom-left-radius:4px;
     box-shadow:0 1px 2px rgba(0,0,0,0.06);
   }
@@ -134,14 +150,14 @@
     opacity:0.6;
     margin-top:4px;
   }
- 
+
   /* Input bar */
   .input-bar{
     flex-shrink:0;
     display:flex;
     align-items:center;
     gap:8px;
-    padding:10px 12px;
+    padding:10px 12px calc(10px + env(safe-area-inset-bottom, 0px)) 12px;
     background:var(--paper);
     border-top:1px solid var(--paper-dark);
   }
@@ -157,7 +173,7 @@
   }
   .icon-btn:active{ transform:scale(0.94); }
   .icon-btn svg{ width:19px; height:19px; }
- 
+
   .text-field{
     flex:1;
     border:1.5px solid var(--paper-dark);
@@ -170,7 +186,7 @@
     max-height:90px;
   }
   .text-field:focus{ outline:2px solid var(--amber); }
- 
+
   .send-btn{
     width:40px; height:40px;
     border-radius:50%;
@@ -183,33 +199,36 @@
   }
   .send-btn:disabled{ opacity:0.35; cursor:default; }
   .send-btn svg{ width:17px; height:17px; }
- 
+
   input[type="file"]{ display:none; }
 </style>
 </head>
 <body>
- 
+
 <div class="phone">
- 
+
   <div class="header">
     <div class="avatar">🌿</div>
     <div class="header-txt">
-      <h1>Académie Revolte</h1>
-      <span>Activité à l'atelier</span>
+      <h1>Balade au jardin</h1>
+      <span>Activité en cours</span>
     </div>
   </div>
- 
+
   <div class="dl-banner" id="dl-banner">
-    <button onclick="downloadPdf()">Enregistrer la discussion (pdf)</button>
+    <button onclick="downloadPdf()">Télécharger le résultat</button>
   </div>
- 
+
   <div class="chat" id="chat">
-    <div class="bubble in">
-      Pour cette activité à l'atelier, prenez en photo chacun des composants clés d'un véhicule électrique. Vous pouvez noter leur nom sous chaque photo.
-      <span class="time" id="start-time"></span>
+    <div class="msg-row in">
+      <img class="sender-photo" src="avatar.png" alt="">
+      <div class="bubble in">
+        Allons dans le jardin prendre en photo des pissenlits 🌼
+        <span class="time" id="start-time"></span>
+      </div>
     </div>
   </div>
- 
+
   <div class="input-bar">
     <button class="icon-btn" id="camera-btn" title="Prendre une photo">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -226,9 +245,9 @@
       </svg>
     </button>
   </div>
- 
+
 </div>
- 
+
 <script>
 const chat = document.getElementById('chat');
 const textInput = document.getElementById('text-input');
@@ -236,32 +255,32 @@ const sendBtn = document.getElementById('send-btn');
 const photoInput = document.getElementById('photo-input');
 const cameraBtn = document.getElementById('camera-btn');
 const dlBanner = document.getElementById('dl-banner');
- 
+
 let entries = [];
 let firstSent = false;
- 
+
 document.getElementById('start-time').textContent = nowTime();
- 
+
 function nowTime(){
   return new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
 }
- 
+
 textInput.addEventListener('input', () => {
   sendBtn.disabled = textInput.value.trim().length === 0;
   textInput.style.height = 'auto';
   textInput.style.height = Math.min(textInput.scrollHeight, 90) + 'px';
 });
- 
+
 textInput.addEventListener('keydown', (e) => {
   if(e.key === 'Enter' && !e.shiftKey){
     e.preventDefault();
     if(!sendBtn.disabled) sendText();
   }
 });
- 
+
 sendBtn.addEventListener('click', sendText);
 cameraBtn.addEventListener('click', () => photoInput.click());
- 
+
 photoInput.addEventListener('change', (e) => {
   const file = e.target.files[0];
   if(!file) return;
@@ -272,7 +291,7 @@ photoInput.addEventListener('change', (e) => {
   };
   reader.readAsDataURL(file);
 });
- 
+
 function sendText(){
   const val = textInput.value.trim();
   if(!val) return;
@@ -281,7 +300,7 @@ function sendText(){
   textInput.style.height = 'auto';
   sendBtn.disabled = true;
 }
- 
+
 function addBubble(type, content){
   const time = nowTime();
   const div = document.createElement('div');
@@ -293,33 +312,49 @@ function addBubble(type, content){
   }
   chat.appendChild(div);
   chat.scrollTop = chat.scrollHeight;
- 
+
   entries.push({type, content, time});
- 
+
   if(!firstSent){
     firstSent = true;
     dlBanner.classList.add('show');
   }
 }
- 
+
 function escapeHtml(str){
   const d = document.createElement('div');
   d.textContent = str;
   return d.innerHTML;
 }
- 
-function downloadPdf(){
+
+function getImageNaturalSize(dataUrl){
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight });
+    img.onerror = () => resolve({ width: 1, height: 1 }); // repli si une image ne charge pas
+    img.src = dataUrl;
+  });
+}
+
+async function downloadPdf(){
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit:'mm', format:'a4' });
   const marginX = 18;
   const pageWidth = 210;
   const usableWidth = pageWidth - marginX*2;
+  const maxImgWidth = 80;   // encombrement maximum d'une photo, en mm
+  const maxImgHeight = 100;
   let y = 22;
- 
+
+  // Précharge les dimensions réelles de chaque photo avant de composer le PDF
+  const sizes = await Promise.all(
+    entries.map((e) => e.type === 'photo' ? getImageNaturalSize(e.content) : Promise.resolve(null))
+  );
+
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(17);
   doc.setTextColor(31,59,44);
-  doc.text("Activité à l'atelier", marginX, y);
+  doc.text('Balade au jardin', marginX, y);
   y += 7;
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
@@ -329,15 +364,14 @@ function downloadPdf(){
   doc.setDrawColor(220,212,190);
   doc.line(marginX, y, pageWidth - marginX, y);
   y += 8;
- 
+
   doc.setFont('helvetica', 'italic');
   doc.setFontSize(11);
   doc.setTextColor(89,117,74);
-  doc.text("« Pour cette activité à l'atelier, prenez en photo chacun des composants clés d'un véhicule électrique. »", marginX, y);
-   doc.text("Vous pouvez noter leur nom sous chaque photo. »", marginX, y);
+  doc.text('« Allons dans le jardin prendre en photo des pissenlits »', marginX, y);
   y += 10;
- 
-  entries.forEach((e) => {
+
+  entries.forEach((e, i) => {
     if(y > 260) { doc.addPage(); y = 22; }
     if(e.type === 'text'){
       doc.setFont('helvetica', 'normal');
@@ -347,8 +381,16 @@ function downloadPdf(){
       doc.text(lines, marginX, y);
       y += lines.length * 6 + 4;
     } else {
-      const imgWidth = 80;
-      const imgHeight = 80;
+      // Ajuste la photo dans un encombrement maximum tout en gardant son ratio d'origine
+      const natural = sizes[i] || { width: 1, height: 1 };
+      const ratio = natural.width / natural.height;
+      let imgWidth = maxImgWidth;
+      let imgHeight = imgWidth / ratio;
+      if(imgHeight > maxImgHeight){
+        imgHeight = maxImgHeight;
+        imgWidth = imgHeight * ratio;
+      }
+
       if(y + imgHeight > 275){ doc.addPage(); y = 22; }
       try{
         doc.addImage(e.content, 'JPEG', marginX, y, imgWidth, imgHeight);
@@ -362,10 +404,10 @@ function downloadPdf(){
     doc.text(e.time, marginX, y);
     y += 6;
   });
- 
-  doc.save('activite-composants.pdf');
+
+  doc.save('balade-jardin.pdf');
 }
 </script>
- 
+
 </body>
 </html>
