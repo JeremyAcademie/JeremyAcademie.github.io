@@ -330,11 +330,25 @@ function escapeHtml(str){
   return d.innerHTML;
 }
 
-function getImageNaturalSize(dataUrl){
+function normalizeImageOrientation(dataUrl){
   return new Promise((resolve) => {
     const img = new Image();
-    img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight });
-    img.onerror = () => resolve({ width: 1, height: 1 }); // repli si une image ne charge pas
+    img.onload = () => {
+      // Le navigateur applique déjà la rotation EXIF à l'affichage : naturalWidth/Height
+      // reflètent l'orientation correcte. En redessinant sur un canvas à cette taille,
+      // on "grave" cette orientation dans les pixels, ce que jsPDF ne fait pas tout seul.
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      resolve({
+        dataUrl: canvas.toDataURL('image/jpeg', 0.92),
+        width: canvas.width,
+        height: canvas.height
+      });
+    };
+    img.onerror = () => resolve({ dataUrl, width: 1, height: 1 }); // repli si l'image ne charge pas
     img.src = dataUrl;
   });
 }
@@ -349,9 +363,9 @@ async function downloadPdf(){
   const maxImgHeight = 100;
   let y = 22;
 
-  // Précharge les dimensions réelles de chaque photo avant de composer le PDF
-  const sizes = await Promise.all(
-    entries.map((e) => e.type === 'photo' ? getImageNaturalSize(e.content) : Promise.resolve(null))
+  // Normalise chaque photo (orientation correcte + dimensions réelles) avant de composer le PDF
+  const normalized = await Promise.all(
+    entries.map((e) => e.type === 'photo' ? normalizeImageOrientation(e.content) : Promise.resolve(null))
   );
 
   doc.setFont('helvetica', 'bold');
@@ -389,21 +403,17 @@ async function downloadPdf(){
       y += lines.length * 6 + 4;
     } else {
       // Ajuste la photo dans un encombrement maximum tout en gardant son ratio d'origine
-      const natural = sizes[i] || { width: 1, height: 1 };
-      const ratio = natural.width / natural.height;
+      const norm = normalized[i] || { dataUrl: e.content, width: 1, height: 1 };
+      const ratio = norm.width / norm.height;
       let imgWidth = maxImgWidth;
       let imgHeight = imgWidth / ratio;
       if(imgHeight > maxImgHeight){
         imgHeight = maxImgHeight;
         imgWidth = imgHeight * ratio;
       }
-
+ 
       if(y + imgHeight > 275){ doc.addPage(); y = 22; }
-      try{
-        doc.addImage(e.content, 'JPEG', marginX, y, imgWidth, imgHeight);
-      }catch(err){
-        doc.addImage(e.content, 'PNG', marginX, y, imgWidth, imgHeight);
-      }
+      doc.addImage(norm.dataUrl, 'JPEG', marginX, y, imgWidth, imgHeight);
       y += imgHeight + 6;
     }
     doc.setFontSize(8);
